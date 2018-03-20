@@ -17,7 +17,6 @@ def get_sql_data(search_sql):
 def get_access_token_key():
     search_sql = 'select oauth_token from users where screen_name='
     return get_sql_data(search_sql)
-   
 
 def get_access_token_secret():
     search_sql = 'select oauth_token_secret from users where screen_name='
