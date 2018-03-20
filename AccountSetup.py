@@ -74,14 +74,6 @@ if __name__ == "__main__":
             conn.commit()
             print("Account registration is completed.")
         conn.close()
-   
-    # api = twitter.Api(consumer_key=config.CONSUMER_KEY,
-    #                   consumer_secret=config.CONSUMER_SECRET,
-    #                   access_token_key=oauth_data['oauth_token'],
-    #                   access_token_secret=oauth_data['oauth_token_secret']
-    # )
 
-    
-    #api.PostUpdate("")
 
 
