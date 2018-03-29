@@ -1,7 +1,7 @@
 # coding:utf-8
 from __future__ import print_function
 import oauth2 
-import sys, config
+import sys
 import sqlite3
 import twitter
 import urllib
@@ -15,46 +15,54 @@ from kivy.uix.textinput import TextInput
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.properties import ObjectProperty
+from kivy.config import Config
+import configparser
 
+Config.set('input', 'mouse', 'mouse,disable_multitouch') 
+config = configparser.ConfigParser()
+config.read('setting.ini')
 
-CK = ''
-CS = ''
-ATK = ''
-ACS = ''
+def load_app_keys():
+    return config['APPKEY']['CONSUMER_KEY'], config['APPKEY']['CONSUMER_SECRET']
 
-def get_sql_data(search_sql, account_id):
-    with closing(sqlite3.connect(dbname)) as conn:
-        c = conn.cursor()
-        search_sql = search_sql + '"' + account_id + '"';
-        cur = c.execute(search_sql)
-        ret = str(cur.fetchall())
-        a = ret.split("'")
-        conn.close()
-    return a[1]
+def load_access_tokens():
+    return config['ACCOUNT']['SELECTED_ACCESS_TOKEN_KEY'], config['ACCOUNT']['SELECTED_ACCESS_TOKEN_SECRET']
     
-def get_access_token_key(account_id):
-    search_sql = 'select oauth_token from users where screen_name='
-    return get_sql_data(search_sql, account_id)
-
-def get_access_token_secret(account_id):
-    search_sql = 'select oauth_token_secret from users where screen_name='
-    return get_sql_data(search_sql, account_id)
-
 class SelectAccountScreen(BoxLayout, Screen):
     dbname = 'Account.db'
     infomation = ObjectProperty(None)
     account = ObjectProperty(None)
+    ACS = ''
+
+    def get_sql_data(self, search_sql, account_id):
+        with closing(sqlite3.connect(dbname)) as conn:
+            c = conn.cursor()
+            search_sql = search_sql + '"' + account_id + '"';
+            cur = c.execute(search_sql)
+            ret = str(cur.fetchall())
+            a = ret.split("'")
+        conn.close()
+        return a[1]
+
+    def get_access_token_key(self, account_id):
+        search_sql = 'select oauth_token from users where screen_name='
+        return self.get_sql_data(search_sql, account_id)
+    
+    def get_access_token_secret(self, account_id):
+        search_sql = 'select oauth_token_secret from users where screen_name='
+        return self.get_sql_data(search_sql, account_id)
 
     def set_account(self):
         try:
             print("Enter your Account ID : ", end="")
             print(self.account.text)
             account_id = self.account.text
-            print(account_id)
+            #print(account_id)
             account_hit = False
             access_token_key = ''
             access_token_secret = ''
-            
+            #print("AAAA")
+
             with closing(sqlite3.connect(dbname)) as conn:
                 c = conn.cursor()
                 search_sql = 'select * from users where screen_name='
@@ -62,8 +70,8 @@ class SelectAccountScreen(BoxLayout, Screen):
                 cur = c.execute(search_sql)
                 # if len(cur.fetchall()):
                 account_hit = True
-                access_token_key = get_access_token_key(account_id)
-                access_token_secret = get_access_token_secret(account_id)
+                access_token_key = self.get_access_token_key(account_id)
+                access_token_secret = self.get_access_token_secret(account_id)
                 # else:
                 #     account_hit = False
             conn.close()
@@ -71,21 +79,30 @@ class SelectAccountScreen(BoxLayout, Screen):
             # if (account_hit == False):
             # print("Sorry, but the account is not registered")
             #     sys.exit()
-                
-            api = twitter.Api(consumer_key=config.CONSUMER_KEY,
-                              consumer_secret=config.CONSUMER_SECRET,
-                              access_token_key=access_token_key,
-                              access_token_secret=access_token_secret
-            )
-            global CK, CS, ATK, ATS
-            CK = config.CONSUMER_KEY
-            CS = config.CONSUMER_SECRET
-            ATK = access_token_key
-            ATS = access_token_secret
-            #api.PostUpdate("set Account")
+            #print("AAAA")
 
+            section1 = 'ACCOUNT'
+            config.set(section1, 'SELECTED_ACCOUNT_ID', account_id)
+            config.set(section1, 'SELECTED_ACCESS_TOKEN_KEY', access_token_key)
+            config.set(section1, 'SELECTED_ACCESS_TOKEN_SECRET', access_token_secret)
+            with open('setting.ini', 'w') as file:
+                config.write(file)
+                
+            #print("AAAA")
+            CK, CS = load_app_keys()
+            ATK, ATS = load_access_tokens()
+            #print(CK)
+            api = twitter.Api(consumer_key=CK,
+                              consumer_secret=CS,
+                              access_token_key=ATK,
+                              access_token_secret=ATS
+            )
+
+            #api.PostUpdate("set Account")
+            self.infomation.text = account_id + " is selected."
         except IndexError:
-            print("IndexError")    
+            print("IndexError")
+            self.infomation.text = "The account is not registered."
         except KeyError:
             print("KeyError")
         except ValueError:
@@ -98,7 +115,8 @@ class RegistAccountScreen(BoxLayout, Screen):
     number = ObjectProperty(None)
     #message = ObjectProperty(None)
     def get_request_token(self):
-        consumer = oauth2.Consumer(key=config.CONSUMER_KEY, secret=config.CONSUMER_SECRET)
+        CK, CS = load_app_keys()
+        consumer = oauth2.Consumer(key=CK, secret=CS)
         client = oauth2.Client(consumer)
         response, content = client.request("https://api.twitter.com/oauth/request_token", "GET")
         content = (content.decode())
@@ -110,7 +128,8 @@ class RegistAccountScreen(BoxLayout, Screen):
         return oauth_data
     
     def get_access_token(self, oauth_token, oauth_verifier):
-        consumer = oauth2.Consumer(key=config.CONSUMER_KEY, secret=config.CONSUMER_SECRET)
+        CK, CS = load_app_keys()
+        consumer = oauth2.Consumer(key=CK, secret=CS)
         token = oauth2.Token(oauth_token, oauth_verifier)
         client = oauth2.Client(consumer, token)
         response, content = client.request("https://api.twitter.com/oauth/access_token", "POST", body="oauth_verifier={0}".format(oauth_verifier))
@@ -129,7 +148,7 @@ class RegistAccountScreen(BoxLayout, Screen):
         #oauth_data = ast.literal_eval(oauth_data)
         # self.message.text="a"
         # print(self.message.text)
-        
+        #print(oauth)
         url = "https://api.twitter.com/oauth/authorize?oauth_token=" + oauth['oauth_token']
         browser = web.get('"/usr/bin/chromium-browser" %s')
         browser.open(url)
@@ -174,7 +193,6 @@ class RegistAccountScreen(BoxLayout, Screen):
                     print("Account registration is completed.")
                     msg = "Account registration is completed."
                 conn.close()
-            print(type(msg))
             self.infomation.text = msg
 
         except KeyError:
@@ -183,7 +201,7 @@ class RegistAccountScreen(BoxLayout, Screen):
 
         except NameError:
             print("Error2")
-            self.infomation.text = "Something error occurred"
+            self.infomation.text = "Verify account on the browser"
             
 class TimelineScreen(BoxLayout, Screen):
     #global infomation_message
@@ -191,9 +209,11 @@ class TimelineScreen(BoxLayout, Screen):
     tweet_input_form = ObjectProperty(None)
     tweet_view = ObjectProperty(None)
     
-    def post_tweet(self):
-        global CK, CS, ATK, ATS
-        try: 
+    def post_tweet(self):        
+        try:
+            CK, CS = load_app_keys()
+            ATK, ATS = load_access_tokens()
+
             tweet = self.tweet_input_form.text
             api = twitter.Api(consumer_key=CK,
                               consumer_secret=CS,
