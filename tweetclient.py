@@ -11,12 +11,16 @@ from contextlib import closing
 from contextlib import contextmanager
 from kivy.app import App
 from kivy.uix.floatlayout import FloatLayout
+from kivy.uix.gridlayout import GridLayout
+from kivy.uix.scrollview import ScrollView
 from kivy.uix.textinput import TextInput
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.properties import ObjectProperty
 from kivy.config import Config
+from kivy.uix.button import Button
 import configparser
+from kivy.core.window import Window
 
 Config.set('input', 'mouse', 'mouse,disable_multitouch') 
 config = configparser.ConfigParser()
@@ -202,25 +206,57 @@ class RegistAccountScreen(BoxLayout, Screen):
         except NameError:
             print("Error2")
             self.infomation.text = "Verify account on the browser"
+
+class TweetViewPane():
+
+    def update_timeline(self):
+        layout = GridLayout(cols=1, spacing=10, size_hint_y=None)
+
+        layout.bind(minimum_height=layout.setter('height'))
+
+        for i in range(10):
+            btn = Button(text=str(i), size_hint_y=None, height=40)
+            layout.add_widget(btn)
+        self = ScrollView(pos_hint={'x': .5, 'y': .6}, size_hint=(None, None), size=(300, 200))
+        self.add_widget(layout)
+        print(self)
+        print("aaa")
+
+
+    
             
 class TimelineScreen(BoxLayout, Screen):
     #global infomation_message
     infomation = ObjectProperty(None)
     tweet_input_form = ObjectProperty(None)
     tweet_view = ObjectProperty(None)
-    
+
+    def update_timeline(self):
+        TVP = TweetViewPane()
+        TVP.update_timeline()
+        # layout = GridLayout(cols=1, spacing=10, size_hint_y=None)
+        # # Make sure the height is such that there is something to scroll.
+        # layout.bind(minimum_height=layout.setter('height'))
+        # for i in range(100):
+        #     btn = Button(text=str(i), size_hint_y=None, height=40)
+        #     layout.add_widget(btn)
+        # root = ScrollView(pos_hint={'x': .3, 'y': .1}, size_hint=(.7, .7), size=(300, 200))
+        # self.add_widget(layout)
+        # print("aa")
+
+        
+
+            
     def post_tweet(self):        
         try:
             CK, CS = load_app_keys()
             ATK, ATS = load_access_tokens()
-
             tweet = self.tweet_input_form.text
             api = twitter.Api(consumer_key=CK,
                               consumer_secret=CS,
                               access_token_key=ATK,
                               access_token_secret=ATS
             )
-        
             api.PostUpdate(tweet)
             self.infomation.text = tweet + " is tweeted."
         except twitter.error.TwitterError:
@@ -229,7 +265,10 @@ class TimelineScreen(BoxLayout, Screen):
         except NameError:
             print("Error2")
             self.infomation.text = "Something error occurred"
-            
+    # def update_timeline(self):        
+    #     button = Button(text='My first button')
+    #     self.add_widget(button)
+    
 class ClientApp(App):
     def build(self):
         sm = ScreenManager()
