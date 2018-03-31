@@ -1,0 +1,209 @@
+# <TweetViewPane>:
+    # Button:
+    #     pos_hint: {'x':.3, 'y':.1}
+    #     size: 300, 200
+
+
+
+        
+<TimelineScreen>:
+    tweet_input_form: tweet
+    #tweet_view: view
+    infomation: info
+    orientation: 'vertical'
+    padding: 20
+    spacing: 10
+
+    BoxLayout:
+        orientation: 'horizontal'
+        size_hint: 1, .1
+        Button:
+            size_hint: .25, 1
+            text: "Timeline"
+            # if clicked
+            on_press: root.manager.current = 'timeline'
+            on_release: root.update_timeline()
+        Button:
+            size_hint: .25, 1
+            text: "Direct Message"
+            # if clicked
+            # on_release: root.hoge()
+        Button:
+            size_hint: .25, 1
+            text: "Register Account"
+            # if clicked
+            on_press: root.manager.current = 'register'
+        Button:
+            size_hint: .25, 1
+            text: "Select Account"
+            # if clicked
+            on_press: root.manager.current = 'select'
+            
+    BoxLayout:
+        orientation: 'horizontal'
+        size_hint: 1, .7
+        spacing: 10
+        BoxLayout:
+            spacing: 10
+            size_hint: 1, 1
+            orientation: 'vertical'            
+            TextInput:
+                spacing: 10
+                size_hint: .3, .9
+                id: tweet
+                readonly: False
+                text: "Tweet"
+                # if clicked
+            Button:
+                size_hint: .3, .1
+                text: "Tweet"
+                # if clicked
+                # on_release: root.hoge()
+                on_release: root.post_tweet()
+                
+        # ScrollView:
+        #     size_hint: .7, 1
+        #     GridLayout:
+        #         #width: 500
+        #         cols: 1
+        #         padding: 10
+        #         spacing: 10
+        #         size_hint_y: None
+        #         height: self.minimum_height
+
+        #         Button:
+        #             text: "a"
+        #             size_hint_y: None
+        #             height: 40
+
+             
+
+                    
+    TextInput:
+        size_hint: 1, .1
+        id: info
+        readonly: True
+        text: "infomation"
+
+<RegistAccountScreen>:
+    number: PIN
+    infomation: info
+    message: a
+    orientation: 'vertical'
+    padding: 20
+    
+    BoxLayout:
+        orientation: 'horizontal'
+        size_hint: 1, .1
+        Button:
+            size_hint: .25, 1
+            text: "Timeline"
+            # if clicked
+            on_press: root.manager.current = 'timeline'
+        Button:
+            size_hint: .25, 1
+            text: "Direct Message"
+            # if clicked
+            # on_release: root.hoge()
+        Button:
+            size_hint: .25, 1
+            text: "Register Account"
+            # if clicked
+            on_press: root.manager.current = 'register'
+        Button:
+            size_hint: .25, 1
+            text: "Select Account"
+            # if clicked
+            on_press: root.manager.current = 'select'
+    BoxLayout:
+        orientation: 'vertical'
+        size_hint: 1, .7
+        Label:
+            font_size: 70
+            id: a
+            text: "PINCODE"
+            size_hint: 1, .4
+        TextInput:
+            size_hint: 1, .4
+            id: PIN
+            font_size: 100
+            readonly: False
+            text: ""
+    BoxLayout:
+        orientation: 'horizontal'
+        size_hint: 1, .1      
+        Button:
+            size_hint: .5, 1
+            text: "Enter PIN"
+            # if clicked
+            on_release: root.enter_pin()
+        Button:
+            size_hint: .5, 1
+            text: "Open Browser"
+            # if clicked
+            on_release: root.setup_account()
+    TextInput:
+        size_hint: 1, .1
+        id: info
+        readonly: True
+        text: "infomation"
+
+
+
+<SelectAccountScreen>:
+    account: name
+    infomation: info
+    message: a
+    orientation: 'vertical'
+    padding: 20
+    
+    BoxLayout:
+        orientation: 'horizontal'
+        size_hint: 1, .1
+        Button:
+            size_hint: .25, 1
+            text: "Timeline"
+            # if clicked
+            on_press: root.manager.current = 'timeline'
+        Button:
+            size_hint: .25, 1
+            text: "Direct Message"
+            # if clicked
+            # on_release: root.hoge()
+        Button:
+            size_hint: .25, 1
+            text: "Register Account"
+            # if clicked
+            on_press: root.manager.current = 'register'
+        Button:
+            size_hint: .25, 1
+            text: "Select Account"
+            # if clicked
+            on_press: root.manager.current = 'select'
+    BoxLayout:
+        orientation: 'vertical'
+        size_hint: 1, .7
+        Label:
+            font_size: 70
+            id: a
+            text: "Account Name"
+            size_hint: 1, .4
+        TextInput:
+            size_hint: 1, .4
+            id: name
+            font_size: 100
+            readonly: False
+            text: ""
+     
+        Button:
+            size_hint: 1, .1
+            text: "Enter"
+            # if clicked
+            on_release: root.set_account()
+            #on_press: root.manager.current = 'timeline'
+
+    TextInput:
+        size_hint: 1, .1
+        id: info
+        readonly: True
+        text: "infomation"
